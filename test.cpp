@@ -16,7 +16,7 @@ Funkcja calkowania metoda Simpsona, przekazanie parametrow poczatku i konca prze
 Obliczenia przedzialu calkowania na N rownych czesci, zastosowanie klauzuli redukcji zmiennej calka, ktorej wszystkie prywatne kopie zmiennych sa wspodzioelone,a wynik koncowy jesty zapisywany do globalnej zmiennej wspoldzielonej
 Zastosowanie omp_get_wtime do obliczenia czasu jaki jest potrzebny na wykonanie tej funkcji
 */
-float calkowanie(float poczPrzedzial, float koncPrzedzial, int n, int red)
+double calkowanie(double poczPrzedzial, double koncPrzedzial, int n, int red)
 {
    
     double now = omp_get_wtime();
@@ -25,7 +25,7 @@ float calkowanie(float poczPrzedzial, float koncPrzedzial, int n, int red)
     double h;
     /* Zapewnienie dostepu do innego bloku pamieci dla kazdego watku*/
   //wątek powinien mieć własne wystąpienie zmiennej
-        h = (b - a) / (int)lobliczen;            //odleglosc miedzy dwoma sasiednimi punktami, przedzial calkowania dzielony na N rownych czesci
+        h = (b - a) / lobliczen;            //odleglosc miedzy dwoma sasiednimi punktami, przedzial calkowania dzielony na N rownych czesci
     #pragma omp parallel for num_threads(lwatkow) reduction(+: s,calka) private(xs)//zmiennea, które jest prywatne dla każdego wątku jest obiektem operacji redukcji na końcu regionu równoległego
     for (int i = 1; i < lobliczen; i++)
     {
@@ -41,53 +41,41 @@ float calkowanie(float poczPrzedzial, float koncPrzedzial, int n, int red)
     printf("Czas Simpsonem wynosi %f\n", omp_get_wtime() - now) ;
     
     
-    return calka;
+    return (double)calka;
     
 
 }
 
-float trapezy(float poczPrzedzial, float koncPrzedzial, int n, int red){
-    float s  = 0,liczbaObli=n,wynik=0;
-    
-    int lwatkow=red;
-    float dx = (koncPrzedzial - poczPrzedzial) / liczbaObli;
-    double now = omp_get_wtime();
-    const int N = static_cast<int>((koncPrzedzial - poczPrzedzial) / dx);
-
-  //#pragma omp parallel for num_threads(lwatkow) reduction(+: s)
-    for(int i = 1; i < N; i++) {
-        s += func(poczPrzedzial + i * dx);
-        }
-  wynik += (s + (func(poczPrzedzial) + func(koncPrzedzial)) / 2) * dx;
-  printf("Czas trapezowym wynosi %f\n", omp_get_wtime() - now) ;
-  return wynik;
+double trapezy(double poczPrzedzial, double koncPrzedzial, int n, int red){//retangle
+    double s  = 0,xp=poczPrzedzial,xk=koncPrzedzial;
+    int N=n;
+  double dx = (xk - xp) / N;
+  for(int i = 1; i < N; i++) s += func(xp + i * dx);
+  s = (s + (func(xp) + func(xk)) / 2) * dx;
+  return s;
 }
 
 
-float trapezy1(float poczPrzedzial, float koncPrzedzial, double n, int red){
-const int N = static_cast<int>((koncPrzedzial - poczPrzedzial) / n);
-	double now = omp_get_wtime();
-	double s = 0;
+double trapezy1(double poczPrzedzial, double koncPrzedzial, double n, int red){
+    double s  = 0;
+    double xk = koncPrzedzial, xp=poczPrzedzial;
+  double dx = (xk - xp) / n;
+  for(int i = 1; i <= n; i++) 
+  s += func(xp + i * dx);
 
-	#pragma omp parallel for num_threads(red) reduction(+: s)
-	for (int i = 1; i < N; i++) 
-    s += func(poczPrzedzial + i * n);
-
-	double wynik = (s + (func(poczPrzedzial) + func(koncPrzedzial)) / 2) * n;
-	 
-	printf("Czas trapezowym wynosi %f\n", omp_get_wtime() - now);
-    return wynik;
-
+  s *= dx;
+  printf("wynik działa = %lf\n",s);
+  return s;
 }
 
-float calkowaniebez(float poczPrzedzial, float koncPrzedzial, int n, int red)
+double calkowaniebez(double poczPrzedzial, double koncPrzedzial, int n, int red)
 {
    
     double now = omp_get_wtime();
     double a = poczPrzedzial, b = koncPrzedzial, xs, s=0, calka=0;
     int lobliczen = n, lwatkow = red;
     double h;
-        h = (b - a) / (int)lobliczen;            //odleglosc miedzy dwoma sasiednimi punktami, przedzial calkowania dzielony na N rownych czesci
+        h = (b - a) / lobliczen;            //odleglosc miedzy dwoma sasiednimi punktami, przedzial calkowania dzielony na N rownych czesci
       
         for (int i = 1; i < lobliczen; i++)
         {
@@ -98,7 +86,7 @@ float calkowaniebez(float poczPrzedzial, float koncPrzedzial, int n, int red)
         s += func(b - h / 2);           //suma wartości funkcji w punktach srodkowych
         calka = (h / 6) * (func(a) + func(b) + 2 * calka + 4 * s); //prsyblizona wartosc calki oznaczonej funckji f(x) w przedziale pocz i konc
 
-    printf("Czas Simpsonem bez omp wynosi %f\n", omp_get_wtime() - now) ;
+    printf("TEST!!!!!!Czas Simpsonem bez omp wynosi %f\n", omp_get_wtime() - now) ;
         
     
     
@@ -139,7 +127,7 @@ int main()
     printf("Wartosc calki metoda trapezow wynosi=  %f\n",wynik1);
 
     double wynik3 = trapezy1(poczPrzedzial, koncPrzedzial, n, red);
-    printf("Wartosc calki metoda trapezow2 wynosi=  %f\n",wynik3);
+    printf("Wartosc calki metoda prostokątow wynosi=  %f\n",wynik3);
 
  double wynik2 = calkowaniebez(poczPrzedzial, koncPrzedzial, n, red);
     printf("Wartosc calki metoda trapezow wynosi=  %f\n",wynik2);
