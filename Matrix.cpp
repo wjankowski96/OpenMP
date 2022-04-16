@@ -201,14 +201,12 @@ myFile3.open("matrix3.csv");
 fstream file;
     file.open ("matrix3.csv", ios::out | ios::app);
     if (file) {
-        
+        file << "Liczba kolumn: "<<c1<<endl;
+        file<<"Liczba wierszy: "<<c2 <<endl;
         for(int i = 0; i < c1; i++){
             for(int j = 0; j < c2; j++)
             {
-                
                 file << mult[i][j]<<";";
-                
-                
             }
             file <<  endl;
         }
