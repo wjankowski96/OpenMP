@@ -198,15 +198,25 @@ myFile3.open("matrix3.csv");
 
 
 */
-std::fstream file;
-    file.open ("matrix3.csv", std::ios::out | std::ios::app);
+fstream file;
+    file.open ("matrix3.csv", ios::out | ios::app);
     if (file) {
-    for(int i = 0; i < 3; ++i)
-    for(int j = 0; j < 3; ++i)
-    {
-        file << "\"" << mult[i][j] << "\";";
-    }
-    file <<  std::endl;
         
+        for(int i = 0; i < c1; i++){
+            for(int j = 0; j < c2; j++)
+            {
+                
+                file << mult[i][j]<<";";
+                
+                
+            }
+            file <<  endl;
+        }
+            
+    }else{
+        printf("Blad pliku");
+    }
+    
+    file.close();
     return 0;
 }
