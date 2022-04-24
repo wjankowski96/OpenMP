@@ -28,10 +28,6 @@ using namespace std;
 
 int main()
 {
-
-/*
-POBRANIE MACIERZY PIERWSZEJ
-*/
   vector<double> matrix;
   //readfile
   fstream file;
@@ -71,15 +67,15 @@ for(int i=0; i<row; i++){
     file << matrix[i]<<",";
   }
   file.close();
-cout<<endl<<endl;
-  /*
+  cout<<endl<<endl;
+   /*
   POBRANIE DRUGIEJ MACIERZY
   */
 
  vector<double> matrix2;
   //readfile
   fstream file1;
-  file.open("matrix2.csv");
+  file1.open("matrix2.csv");
   string line1;
   while (getline( file1, line1,'\n'))  //讀檔讀到跳行字元
 	{
@@ -107,7 +103,8 @@ for(int i=0; i<row1; i++){
         if(j == row-1)
             cout << endl;
     }}
-cout<<endl<<endl;
+cout<<endl<<row1<<endl;
+
 /*
 MNOZENIE MACIERZY
 */
@@ -133,5 +130,19 @@ for(int i = 0; i < row1; ++i)
         if(j == row1-1)
             cout << endl;
     }
+
+    fstream file4;
+     file4.open ("matrix3.csv", ios::out | ios::app);
+     if (file4) {
+         file4 << "Liczba kolumn: "<<row1<<endl;
+         file4<<"Liczba wierszy: "<<row1 <<endl;
+         for(int i = 0; i < row1; i++){
+             for(int j = 0; j < row1; j++)
+             {
+                 file4 << mnozenie[i][j]<<";";
+             }
+             file4 <<  endl;
+         }
+     }
   return 0;
 }
