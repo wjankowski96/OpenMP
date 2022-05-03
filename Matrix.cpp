@@ -65,6 +65,26 @@ for(int i=0; i<3; i++){
             cout << endl;
     }}
 
+cout<<"-------------gauss-------------"<<endl<<endl;
+double b,x[4];
+int n=3;
+for(int j=0; j<n; j++) {
+      for(int i=0; i<n; i++) {
+         if(i!=j) {
+            b=matrix1[i][j]/matrix1[j][j];
+            for(int k=0; k<n+1; k++) { 
+               matrix1[i][k]=matrix1[i][k]-b*matrix1[j][k];
+               cout<<"wynik: "<<matrix1[i][k]<<endl;
+            }
+         }
+      }
+   }
+   cout<<"\nThe solution is:\n";
+   for(int i=0; i<n; i++) {
+      x[i]=matrix1[i][n+1]/matrix1[i][i];
+      cout<<"x"<<i << "="<<x[i]<<" "<<endl;
+   }
+
   
     return 0;
 }
