@@ -28,7 +28,7 @@ using namespace std;
 #include <sys/time.h>
 int main()
 {
-      vector<double> matrix;
+      vector<float> matrix;
   //readfile
   fstream file;
   file.open("matrixC.csv");
@@ -44,7 +44,7 @@ int main()
 	}
   file.close();
   int row =  3;//(line.size()/2);
-  double matrix1[2][3];
+  float matrix1[2][3];
   int a=0;
   int wiersz=matrix[a];
   cout<<"liczba wierszy "<<wiersz<<endl;
@@ -66,25 +66,78 @@ for(int i=0; i<3; i++){
     }}
 
 cout<<"-------------gauss-------------"<<endl<<endl;
-double b,x[4];
-int n=3;
-for(int j=0; j<n; j++) {
-      for(int i=0; i<n; i++) {
+/*int i,j,k,n=3;
+float b;
+float x[4];
+
+for(j=1; j<=n; j++) {
+      for(i=1; i<=n; i++) {
          if(i!=j) {
             b=matrix1[i][j]/matrix1[j][j];
-            for(int k=0; k<n+1; k++) { 
+            for(k=1; k<=n+1; k++) { 
                matrix1[i][k]=matrix1[i][k]-b*matrix1[j][k];
-               cout<<"wynik: "<<matrix1[i][k]<<endl;
+
             }
          }
       }
    }
+
+   for(int i=0; i<n; i++)
+	{
+		for(int j=0; j<n+1; j++)
+		cout<<setw(8)<<setprecision(4)<<matrix1[i][j];
+		cout<<endl;
+	}
+	
    cout<<"\nThe solution is:\n";
-   for(int i=0; i<n; i++) {
+   for(i=1; i<=n; i++) {
       x[i]=matrix1[i][n+1]/matrix1[i][i];
-      cout<<"x"<<i << "="<<x[i]<<" "<<endl;
+      cout<<"x"<<i << "="<<setw(5)<<setprecision(5)<<x[i]<<" ";
    }
 
+*/
+
+
+
+int N=3,i,j,k;
+float temp=0,s, x[N];
+for(int j=0; j<N-1; j++)
+	{
+		for(int i=j+1; i<N; i++)
+		{
+			temp=matrix1[i][j]/matrix1[j][j];
+
+			for(int k=0; k<N+1; k++)
+				matrix1[i][k]-=matrix1[j][k]*temp;
+		}
+	}
+	
+		//print the Upper Triangular matrix
+
+	cout<<"\n ---------------------------------\n";
+	cout<<"\n Upper Triangular Matrix is:\n";
+	for(int i=0; i<N; i++)
+	{
+		for(int j=0; j<N+1; j++)
+		cout<<setw(8)<<setprecision(4)<<matrix1[i][j];
+		cout<<endl;
+	}
+
+	for(i=N-1; i>=0; i--)
+	{
+		s=0;
+		for(j=i+1; j<N; j++)
+		s += matrix1[i][j]*x[j];
+		x[i]=(matrix1[i][N]-s)/matrix1[i][i];
+	}
+
+	//print values of x,y,z
+
+	cout<<"\n The Solution is:\n";
+	for(i=0; i<N; i++)
+	 cout<<"x["<<setw(3)<<i+1<<"]="<<setw(7)<<setprecision(4)<<x[i]<<endl;
+
+	
   
     return 0;
 }
