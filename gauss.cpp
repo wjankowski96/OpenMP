@@ -28,8 +28,7 @@ using namespace std;
 #include <sys/time.h>
 int main()
 {
-
-    struct timeval begin1, end1; // structura danych typu timeval
+ struct timeval begin1, end1; // structura danych typu timeval
     gettimeofday(&begin1, 0);    // funckja pobiera zegar systemowy
 
     vector<float> matrix;
@@ -115,21 +114,123 @@ int main()
     long microseconds1 = end1.tv_usec - begin1.tv_usec;
     double elapsed1 = seconds1 + microseconds1 * 1e-6;
 
-    string nazwa = "C_" + to_string(elapsed1) + ".csv"; //+to_string(elapsed)+"_"
-    printf("%s", nazwa.c_str());
+
+    /*OMP NIZEJ*/
+
+    struct timeval begin, end; // structura danych typu timeval
+    gettimeofday(&begin, 0);    // funckja pobiera zegar systemowy
+
+    vector<float> matrixOMP;
+    // readfile
+    fstream fileOMP;
+    fileOMP.open("matrixC.csv");
+    string lineOMP;
+    while (getline(fileOMP, lineOMP, '\n'))
+    {
+        istringstream templineOMP(lineOMP);
+        string dataOMP;
+        while (getline(templineOMP, dataOMP, ';'))
+        {
+            matrixOMP.push_back(stod(dataOMP.c_str()));
+        }
+    }
+    fileOMP.close();
+    int rowOMP = 3; //(lineOMP.size()/2);
+    float matrix1OMP[rowOMP][rowOMP + 1];
+    a = 0;
+    int wierszOMP = matrixOMP[a];
+    cout << "liczba wierszy " << wierszOMP << endl;
+    a = 1;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+
+            matrix1OMP[i][j] = matrixOMP[a];
+
+            a++;
+        }
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            cout << " " << matrix1OMP[i][j];
+            if (j == 3)
+                cout << endl;
+        }
+    }
+
+    int nOMP = rowOMP;
+    float xOMP[nOMP];
+    cout << "\nThe matrixOMP after Pivotisation is:\nOMP";
+    #pragma omp parallel for
+    for (i = 0; i < nOMP; i++) // print the new matrixOMP
+    {
+        for (j = 0; j <= nOMP; j++)
+            cout << matrix1OMP[i][j] << setw(16);
+        cout << "\nOMP";
+    }
+    #pragma omp parallel for
+    for (i = 0; i < nOMP - 1; i++) // loop to perform the gauss elimination
+        for (k = i + 1; k < nOMP; k++)
+        {
+            float t = matrix1OMP[k][i] / matrix1OMP[i][i];
+            for (j = 0; j <= nOMP; j++)
+                matrix1OMP[k][j] = matrix1OMP[k][j] - t * matrix1OMP[i][j]; // make the elements below the pivot elements equal to zero or elimnate the variables
+        }
+
+    cout << "\nOMP\nThe matrixOMP after gauss-elimination is as follows:\nOMP";
+    #pragma omp parallel for
+    for (i = 0; i < nOMP; i++) // print the new matrixOMP
+    {
+        for (j = 0; j <= nOMP; j++)
+            cout << matrix1OMP[i][j] << setw(16);
+        cout << "\nOMP";
+    }
+    #pragma omp parallel for
+    for (i = nOMP - 1; i >= 0; i--) // back-substitution
+    {                            // xOMP is an array whose values correspond to the values of xOMP,y,z..
+        xOMP[i] = matrix1OMP[i][nOMP];    // make the variable to be calculated equal to the rhs of the last equation
+        for (j = i + 1; j < nOMP; j++)
+            if (j != i) // then subtract all the lhs values except the coefficient of the variable whose value                                   is being calculated
+                xOMP[i] = xOMP[i] - matrix1OMP[i][j] * xOMP[j];
+        xOMP[i] = xOMP[i] / matrix1OMP[i][i]; // now finally divide the rhs by the coefficient of the variable to be calculated
+    }
+    cout << "\nThe values of the variables are as follows:\nOMP";
+    for (i = 0; i < nOMP; i++)
+        cout << "xOMP[" << i + 1 << "]= " << setw(7) << setprecision(6) << xOMP[i] << endl; // Print the va
+
+    gettimeofday(&end, 0); // pobranie zegara systemowego z konca procesu ktůre up≥ynÍ≥y, i mikrosekundach od 00:00:00, 1 stycznia 1970 r.
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = seconds + microseconds * 1e-6;
+
+   printf("czas realizacji zadania sekwencyjnie przez jeden watek TP: %.5f seconds.\n", elapsed1);
+   printf("czas realizacji zadania sekwencyjnie przez wielewątkow watek TP: %.5f seconds.\n", elapsed);
+   if(elapsed1>elapsed){
+       cout<<endl<<"Dobrze dziala"<<endl;
+   }else{
+       cout<<endl<<"Zle dziala"<<endl;
+   }
+    string nazwa = "C_"+to_string(elapsed1)+"_"+to_string(elapsed)+".csv";
+    printf("%s",nazwa.c_str());
+
     fstream file4;
     file4.open(nazwa, ios::out | ios::app);
     if (file4)
     {
         // file4<<"czas realizacji zadania sekwencyjnie przez jeden watek Ts: "<<elapsed<<endl;
-        file4 << "czas realizacji zadania sekwencyjnie przez wiele watkow Tp: " << elapsed1 << endl;
-        file4 << row << endl;
+        file4<<"czas realizacji zadania sekwencyjnie przez wiele watkow Ts: "<<elapsed<<endl;
+         file4<<"czas realizacji zadania sekwencyjnie przez jeden watkow Tp: "<<elapsed1<<endl;
+        file4 << rowOMP << endl;
 
-        for (int i = 0; i < row; i++)
+        for (int i = 0; i < rowOMP; i++)
         {
-            for (int j = 0; j < row + 1; j++)
+            for (int j = 0; j < rowOMP + 1; j++)
             {
-                file4 << x[i] << ";";
+                file4 << xOMP[i] << ";";
             }
             file4 << endl;
         }
