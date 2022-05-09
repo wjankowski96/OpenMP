@@ -172,8 +172,10 @@ int main()
             cout << matrix1OMP[i][j] << setw(16);
         cout << "\nOMP";
     }
+     float t;
     #pragma omp parallel for
     for (i = 0; i < nOMP - 1; i++) // loop to perform the gauss elimination
+     #pragma omp parallel for shared(matrix1OMP) private(k, j, t)
         for (k = i + 1; k < nOMP; k++)
         {
             float t = matrix1OMP[k][i] / matrix1OMP[i][i];
